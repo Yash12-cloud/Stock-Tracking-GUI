@@ -1,0 +1,117 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class StockAppGUI{
+    +startFrame()
+    +renderTabs()
+    +renderRegions()
+    +refresh()
+}
+
+package components{
+
+    interface GUIComponentIF{
+        +render()
+        +getDescription()
+    }
+    StockAppGUI "1" *- "0...*" GUIComponentIF
+
+    abstract class AbstractGUIComponent implements GUIComponentIF{
+        +getPanel()
+    }
+
+    class GUIMenu extends AbstractGUIComponent implements GUIComponentIF{
+        +render()
+        +getDescription()
+        +getPanel()
+    }
+
+    class ImagePanel extends AbstractGUIComponent implements GUIComponentIF{
+        +render()
+        +getDescription()
+    }
+
+
+    class StockEntryPanel extends AbstractGUIComponent implements GUIComponentIF{
+        +render()
+        +addStock()
+        +deleteStock()
+        +saveData()
+    }
+
+    class InstructionPanel extends AbstractGUIComponent implements GUIComponentIF{
+        +render()
+    }
+
+    class AnalysisDisplay extends AbstractGUIComponent implements GUIComponentIF{
+            +render()
+            +sortByReturnRate()
+            +sortByTotalGain()
+    }
+
+}
+
+package stock_manager{
+
+    class Stock{
+        +ticker
+        +quantity
+        +totalCost
+    }
+
+    class StockWithPrice extends Stock{
+        +ticker
+        +quantity
+        +totalCost
+    }
+
+    class StockSorter{
+        +sortByTotalCost()
+    }
+    StockSorter "1" o- "0...*" Stock
+
+    class StockAPIClient{
+        +postJson()
+    }
+    AnalysisDisplay --> StockSorter
+
+
+    class DisplayHelper{
+        +getTotalGainString()
+        +getReturnRateString()
+        -toString()
+    }
+    DisplayHelper --> StockAPIClient
+    AnalysisDisplay "1" *-> "1" DisplayHelper
+
+    class RequestModel{
+        -APIAccessKey
+        +List<Stock> stocks
+
+    }
+    StockAPIClient --> RequestModel
+
+    RequestModel "1" o- "0...*" Stock
+
+    class ResponseModel{
+        +List<StockWithPrice>stocks
+    }
+
+    StockAPIClient --> ResponseModel
+
+    ResponseModel "1" o- "0...*" StockWithPrice
+
+
+}
+
+package utility{
+    class FileHandler{
+        +writeToFile()
+        +readFromFile()
+    }
+
+    StockEntryPanel --> FileHandler
+    GUIMenu --> FileHandler
+
+}
+@enduml
